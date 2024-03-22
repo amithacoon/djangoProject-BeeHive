@@ -1,0 +1,188 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Django Project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: right;
+
+        }
+        .header {
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+         .logo img {
+            width: 300%; /* Adjust the logo to be 300% bigger */
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 90%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: right;
+            padding: 8px;
+        }
+        th {
+            background-color: #50bcbc;
+            color: #ffffff;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        @media screen and (max-width: 600px) {
+            table {
+                width: 100%;
+            }
+        }
+                .button-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #50bcbc;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #999;
+        }
+
+        .button:hover {background-color: #50bcbc
+        }
+
+        .button:active {
+            background-color: #5064ac;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+
+        .help-button {
+            font-weight: bold;
+            font-size: 24px;
+            line-height: 24px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background-color: #5064ac; /* Default color */
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s, right 0.3s, bottom 0.3s; /* Smooth transition for color and position changes */
+        }
+
+
+
+        /* Style for the floating window */
+        .help-content {
+            display: none;
+            position: fixed;
+            right: 80px;
+            bottom: 80px;
+            background-color: white;
+            color: black;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 300px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        /* Show the help content when the checkbox is checked */
+        #help-checkbox:checked ~ .help-content {
+            display: block;
+        }
+
+        /* Hiding the actual checkbox */
+        #help-checkbox {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        <img src="{% static 'logo.png' %}" alt="Logo" style="width: 85%;">
+    </div>
+</div>
+
+
+<div class="button-container">
+    <button class="button" onclick="alert('Fake Upload CSV Functionality!')">Upload CSV</button>
+</div>
+
+<table>
+    <thead>
+        <tr>
+        <th >שם המיזם</th>
+        <th>אנא פרטו יותר לעומק על קהל היעד של המיזם תוך התייחסות להיקף וצרכים</th>
+        <th>מהי הבעיה שאתם מנסים לפתור?</th>
+        <th>תארו את מודל הפעולה של המיזם וכיצד הוא צפוי לפתור את הבעיה (פסקה)</th>
+        <th>האם יש לכם ניסיון בתחום החברתי?</th>
+        <th>פרטו אודות הניסיון שלכם בתחום החברתי</th>
+        <th>האם יש לכם ניסיון בתחום היזמות?</th>
+        <th>פרטו אודות הניסיון שלכם בתחום היזמות</th>
+        </tr >
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row.col1 }}</td>
+            <td>{{ row.col2 }}</td>
+            <td>{{ row.col3 }}</td>
+            <td>{{ row.col4 }}</td>
+            <td>{{ row.col5 }}</td>
+            <td>{{ row.col6 }}</td>
+            <td>{{ row.col7 }}</td>
+            <td>{{ row.col8 }}</td>
+            <!-- Add more td elements for additional columns if needed -->
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<div class="button-container">
+    <button class="button" onclick="alert('Fake Download CSV Functionality!')">Download CSV</button>
+</div>
+<button class="help-button" onclick="alert('Help Functionality Placeholder!')">?</button>
+
+<!-- Checkbox to toggle help content -->
+<input type="checkbox" id="help-checkbox">
+
+<!-- Label acts as the "?" button -->
+<label for="help-checkbox" class="help-button">?</label>
+
+<!-- Floating window content -->
+<div class="help-content">
+    <strong>Need Help?</strong>
+    <p>This is your help content. You can put instructions or FAQs here.</p>
+</div>
+</body>
+</html>
