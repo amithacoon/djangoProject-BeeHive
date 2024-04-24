@@ -1,0 +1,61 @@
+<!-- templates/csvviewer/display.html -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif; /* Clean and widely available font */
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4; /* Soft background color */
+            color: #333; /* Soft text color for better readability */
+        }
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            margin: 20px auto; /* Center the table with some margin */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 12px 20px; /* Increased padding for better spacing */
+            text-align: right; /* Ensure right alignment for RTL */
+        }
+        th {
+            background-color: #009688; /* Pleasant teal background */
+            color: white; /* White color for headers */
+        }
+        tr:nth-child(even) {
+            background-color: #fafafa; /* Zebra striping for rows */
+        }
+        tr:hover {
+            background-color: #e0f2f1; /* Subtle hover effect */
+        }
+    </style>
+</head>
+<body>
+    <h1>נתוני CSV</h1>
+    <table>
+        {% if data %}
+            <tr>
+                {% for header in data.0 %}
+                    <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in data %}
+            <tr>
+                {% for cell in row %}
+                <td>{{ cell }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="100%">לא נמצאו נתונים</td>
+            </tr>
+        {% endif %}
+    </table>
+</body>
+</html>
