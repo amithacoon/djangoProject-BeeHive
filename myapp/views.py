@@ -92,5 +92,4 @@ def home(request):
          'col10': 'As mention above, there is a need for therapeutic intervention for children with social difficulties. Solutions are accessible to 1:9 kids. The product uniqueness has two main aspects: first, an exclusive system that combines the benefits of the VR technology with an evidenced-based CBT social skills protocol – which no software has performed before. second, enable social skills training independently by the virtual instructor, as well as a tool for therapists'}
 
     ]
-
     return render(request, 'home.html', {'rows': rows})
