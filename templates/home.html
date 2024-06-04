@@ -1,6 +1,24 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he" dir="ltr">
+<script>
+document.querySelector('form').onsubmit = function(e) {
+    e.preventDefault();
+    var formData = new FormData(this);
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => {
+        if (response.ok) {
+            document.getElementById('display-frame').src = 'display-csv/';
+        } else {
+            alert("Failed to upload file.");
+        }
+    })
+    .catch(error => alert('Error: ' + error));
+};
+</script>
 
 <head>
 
@@ -47,7 +65,7 @@
                 width: 100%;
             }
         }
-                .button-container {
+        .button-container {
             text-align: center;
             margin: 20px 0;
         }
@@ -76,6 +94,17 @@
             transform: translateY(4px);
         }
 
+        .center-container {
+              display: flex;
+              flex-direction: column; /* Arrange items vertically */
+              align-items: center;   /* Center items horizontally */
+              justify-content: center; /* Center items vertically */
+            }
+
+        .center-container {
+              display: grid;
+              place-items: center; /* Center both horizontally and vertically */
+            }
         .help-button {
             font-weight: bold;
             font-size: 24px;
@@ -134,42 +163,20 @@
     </div>
 </div>
 
+<div class="center-container">
 
-<div class="button-container">
-    <button class="button" onclick="alert('Fake Upload CSV Functionality!')">Upload CSV</button>
+<form method="post" enctype="multipart/form-data" target="display-frame">
+    {% csrf_token %}
+    {{ form }}
+    <button class="button" type="submit" name="action" value="upload">Upload</button>
+    <button class="button" type="submit" name="action" value="download">Download</button>
+</form>
+<br>
+    <br>
+
+<iframe id="display-frame" name="display-frame" style="width:450%; height:1220px;box-shadow: none; border: none;" src=""></iframe>
 </div>
-<div class="button-container">
-    <button class="button" onclick="alert('Fake Download CSV Functionality!')">Download CSV</button>
-</div>
-<table>
-    <thead>
-        <tr>
-        <th >שם המיזם</th>
-        <th>אנא פרטו יותר לעומק על קהל היעד של המיזם תוך התייחסות להיקף וצרכים</th>
-        <th>מהי הבעיה שאתם מנסים לפתור?</th>
-        <th>תארו את מודל הפעולה של המיזם וכיצד הוא צפוי לפתור את הבעיה (פסקה)</th>
-        <th>האם יש לכם ניסיון בתחום החברתי?</th>
-        <th>פרטו אודות הניסיון שלכם בתחום החברתי</th>
-        <th>האם יש לכם ניסיון בתחום היזמות?</th>
-        <th>פרטו אודות הניסיון שלכם בתחום היזמות</th>
-        </tr >
-    </thead>
-    <tbody>
-        {% for row in rows %}
-        <tr>
-            <td>{{ row.col1 }}</td>
-            <td>{{ row.col2 }}</td>
-            <td>{{ row.col3 }}</td>
-            <td>{{ row.col4 }}</td>
-            <td>{{ row.col5 }}</td>
-            <td>{{ row.col6 }}</td>
-            <td>{{ row.col7 }}</td>
-            <td>{{ row.col8 }}</td>
-            <!-- Add more td elements for additional columns if needed -->
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
 
 
 
