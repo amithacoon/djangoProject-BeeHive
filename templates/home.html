@@ -156,14 +156,49 @@
         <div class="form-row">
             {{ form }}
         </div>
+
         <div class="form-row">
-            <label><input type="radio" name="format" value="csv" checked> CSV</label>
-            <label><input type="radio" name="format" value="xlsx"> XLSX</label>
+            <h3>Save Output as</h3>
+            <label><input type="radio" name="format" value="csv" checked>CSV</label>
+            <label><input type="radio" name="format" value="xlsx">XLSX</label>
         </div>
         <div class="button-container">
+
             <button class="button" type="submit" name="action" value="upload">Upload</button>
             <button class="button" type="button" id="run-button">Run</button>
         </div>
+
+
+{#        #}
+{#        <div class="center-container">#}
+{#    <form method="post" enctype="multipart/form-data" target="display-frame">#}
+{#        {% csrf_token %}#}
+{#        <div class="form-row">#}
+{#            {{ form }}#}
+{#        </div>#}
+{##}
+{#        <div class="form-row">#}
+{#            <h3>2. Save Output as</h3>#}
+{#            <label><input type="radio" name="format" value="csv" checked> CSV</label>#}
+{#            <label><input type="radio" name="format" value="xlsx"> XLSX</label>#}
+{#        </div>#}
+{##}
+{#        <div class="form-row">#}
+{#            <h3>3. Press Upload to load the file</h3>#}
+{#            <button class="button" type="submit" name="action" value="upload">Upload</button>#}
+{#        </div>#}
+{##}
+{#        <div class="form-row">#}
+{#            <h3>4. Press Run to process the file</h3>#}
+{#            <button class="button" type="button" id="run-button">Run</button>#}
+{#        </div>#}
+{#    </form>#}
+{#</div>#}
+
+
+
+
+
     </form>
 
     <div id="progress-container">
@@ -185,8 +220,13 @@
 <label for="help-checkbox" class="help-button">?</label>
 
 <div class="help-content" style="text-align: left;">
-    <strong>?Need Help</strong>
-    <p>This is your help content. You can put instructions or FAQs here</p>
+    <strong>? Need Help</strong>
+    <p>Welcome to the file processing tool! Here are some simple steps to help you get started:</p>
+    <p><strong>1. Select a File:</strong> Click on the "Choose File" button to upload your CSV or XLSX file. Please ensure that your file is in the correct format and that your table is structured as planned for successful processing.</p>
+    <p><strong>2. Save Output as:</strong> Choose the format in which you want to save the processed output. You can select either CSV or XLSX.</p>
+    <p><strong>3. Upload the File:</strong> Click the "Upload" button to upload your file to the server. This step is necessary before you can process the file.</p>
+    <p><strong>4. Process the File:</strong> Once the file is uploaded, click the "Run" button to start processing the file. During processing, you will see an estimated time of arrival (ETA) and a progress bar indicating the status of the processing.</p>
+    <p>If you encounter any issues or have questions, feel free to reach out for support.</p>
 </div>
 
 <script>

@@ -184,10 +184,15 @@ def save_dataframe(df, format, rtl=True):
 
     filename = os.path.join(directory, 'Updated_Table')
 
+    # Apply RTL override for CSV if required
+    if rtl and format.lower() == 'csv':
+        rlo = '\u202E'
+        df = df.applymap(lambda x: rlo + str(x) if isinstance(x, str) else x)
+
     if format.lower() == 'csv':
         full_filename = filename + '.csv'
-        df.to_csv(full_filename, index=False)
-        print(f"DataFrame saved as {full_filename}")
+        df.to_csv(full_filename, index=False, encoding='utf-8-sig')
+        print(f"DataFrame saved as {full_filename} with UTF-8 encoding and RTL orientation")
     elif format.lower() == 'xlsx':
         full_filename = filename + '.xlsx'
         df.to_excel(full_filename, index=False)
@@ -206,6 +211,7 @@ def save_dataframe(df, format, rtl=True):
             print(f"DataFrame saved as {full_filename}")
     else:
         raise ValueError("Unsupported format. Please choose either 'csv' or 'xlsx'.")
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
