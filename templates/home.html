@@ -1,9 +1,11 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="he" dir="ltr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <title>Professional Django Project</title>
     <style>
         body {
@@ -14,14 +16,17 @@
             color: #333;
             text-align: right;
         }
+
         .header {
             color: #ffffff;
             padding: 20px;
             text-align: center;
         }
+
         .logo img {
-            width: 85%;
+            width: 60%;
         }
+
         .center-container {
             display: flex;
             flex-direction: column;
@@ -29,22 +34,26 @@
             justify-content: center;
             padding: 20px;
         }
+
         form {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
         }
+
         .form-row {
             display: flex;
             flex-direction: row;
             align-items: center;
             gap: 10px;
         }
+
         .button-container {
             display: flex;
             gap: 10px;
         }
+
         .button {
             display: inline-block;
             padding: 10px 20px;
@@ -59,14 +68,47 @@
             border-radius: 15px;
             box-shadow: 0 9px #999;
         }
+
         .button:hover {
             background-color: #50bcbc;
         }
+
         .button:active {
             background-color: #5064ac;
             box-shadow: 0 5px #666;
             transform: translateY(4px);
         }
+
+        /* Custom File Input Style */
+        .custom-file-input {
+            display: none;
+        }
+
+        .custom-file-label {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #50bcbc;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #999;
+        }
+
+        .custom-file-label:hover {
+            background-color: #50bcbc;
+        }
+
+        .custom-file-label:active {
+            background-color: #5064ac;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+
         #progress-container {
             width: 100%;
             background-color: #f3f3f3;
@@ -76,6 +118,7 @@
             margin-top: 10px;
             position: relative;
         }
+
         #progress-bar {
             height: 20px;
             background-color: #50bcbc;
@@ -85,6 +128,7 @@
             width: 0%;
             transition: width 0.4s ease;
         }
+
         #progress-text {
             position: absolute;
             width: 100%;
@@ -92,15 +136,18 @@
             line-height: 20px;
             color: #000;
         }
+
         #eta {
             margin-top: 10px;
             font-size: 14px;
             color: #666;
         }
+
         #download-link {
             display: none;
             margin-top: 20px;
         }
+
         .help-button {
             font-weight: bold;
             font-size: 24px;
@@ -119,6 +166,7 @@
             cursor: pointer;
             transition: background-color 0.3s, right 0.3s, bottom 0.3s;
         }
+
         .help-content {
             display: none;
             position: fixed;
@@ -130,160 +178,294 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             width: 300px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             text-align: left;
         }
-        #help-checkbox:checked ~ .help-content {
+
+        #help-checkbox:checked~.help-content {
             display: block;
         }
+
         #help-checkbox {
             display: none;
         }
-    </style>
-</head>
-<body>
 
-<div class="header">
-    <div class="logo">
-        <img src="{% static 'logo.png' %}" alt="Logo">
-    </div>
-</div>
-
-<div class="center-container">
-    <form method="post" enctype="multipart/form-data" target="display-frame">
-        {% csrf_token %}
-        <div class="form-row">
-            {{ form }}
-        </div>
-
-        <div class="form-row">
-            <h3>Save Output as</h3>
-            <label><input type="radio" name="format" value="csv" checked>CSV</label>
-            <label><input type="radio" name="format" value="xlsx">XLSX</label>
-        </div>
-        <div class="button-container">
-
-            <button class="button" type="submit" name="action" value="upload">Upload</button>
-            <button class="button" type="button" id="run-button">Run</button>
-        </div>
-
-
-{#        #}
-{#        <div class="center-container">#}
-{#    <form method="post" enctype="multipart/form-data" target="display-frame">#}
-{#        {% csrf_token %}#}
-{#        <div class="form-row">#}
-{#            {{ form }}#}
-{#        </div>#}
-{##}
-{#        <div class="form-row">#}
-{#            <h3>2. Save Output as</h3>#}
-{#            <label><input type="radio" name="format" value="csv" checked> CSV</label>#}
-{#            <label><input type="radio" name="format" value="xlsx"> XLSX</label>#}
-{#        </div>#}
-{##}
-{#        <div class="form-row">#}
-{#            <h3>3. Press Upload to load the file</h3>#}
-{#            <button class="button" type="submit" name="action" value="upload">Upload</button>#}
-{#        </div>#}
-{##}
-{#        <div class="form-row">#}
-{#            <h3>4. Press Run to process the file</h3>#}
-{#            <button class="button" type="button" id="run-button">Run</button>#}
-{#        </div>#}
-{#    </form>#}
-{#</div>#}
-
-
-
-
-
-    </form>
-
-    <div id="progress-container">
-        <div id="progress-bar"></div>
-        <div id="progress-text"></div>
-    </div>
-    <div id="eta"></div>
-    <div id="run-result"></div>
-
-    <a id="download-link" class="button" href="#" download>Download Processed File</a>
-
-    <br><br>
-    <iframe id="display-frame" name="display-frame" style="width:100%; height:600px; box-shadow: none; border: none;" src=""></iframe>
-</div>
-
-<button class="help-button" onclick="alert('Help Functionality Placeholder!')">?</button>
-
-<input type="checkbox" id="help-checkbox">
-<label for="help-checkbox" class="help-button">?</label>
-
-<div class="help-content" style="text-align: left;">
-    <strong>? Need Help</strong>
-    <p>Welcome to the file processing tool! Here are some simple steps to help you get started:</p>
-    <p><strong>1. Select a File:</strong> Click on the "Choose File" button to upload your CSV or XLSX file. Please ensure that your file is in the correct format and that your table is structured as planned for successful processing.</p>
-    <p><strong>2. Save Output as:</strong> Choose the format in which you want to save the processed output. You can select either CSV or XLSX.</p>
-    <p><strong>3. Upload the File:</strong> Click the "Upload" button to upload your file to the server. This step is necessary before you can process the file.</p>
-    <p><strong>4. Process the File:</strong> Once the file is uploaded, click the "Run" button to start processing the file. During processing, you will see an estimated time of arrival (ETA) and a progress bar indicating the status of the processing.</p>
-    <p>If you encounter any issues or have questions, feel free to reach out for support.</p>
-</div>
-
-<script>
-    document.getElementById('run-button').onclick = function() {
-        document.getElementById('progress-bar').style.display = 'block';
-        document.getElementById('progress-bar').style.width = '0%';
-        document.getElementById('progress-text').innerText = '0%';
-        document.getElementById('eta').innerText = '';
-        document.getElementById('download-link').style.display = 'none';
-
-        var formData = new FormData(document.querySelector('form'));
-        var startTime = Date.now();
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '{% url "run_df" %}', true);
-
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                var response = JSON.parse(xhr.responseText);
-                document.getElementById('run-result').innerHTML = response.result;
-                document.getElementById('download-link').href = response.download_url;
-                document.getElementById('download-link').style.display = 'block';
-            } else {
-                alert('Failed to run the function.');
-            }
-            document.getElementById('progress-bar').style.display = 'none';
-        };
-
-        xhr.send(formData);
-
-        function updateProgressBar() {
-            var progressXhr = new XMLHttpRequest();
-            progressXhr.open('GET', '{% url "get_progress" %}', true);
-
-            progressXhr.onload = function() {
-                if (progressXhr.status === 200) {
-                    var progressResponse = JSON.parse(progressXhr.responseText);
-                    var progress = progressResponse.progress;
-                    var elapsedTime = (Date.now() - startTime) / 1000; // in seconds
-                    var eta = elapsedTime * (100 / progress - 1); // estimated time remaining
-
-                    document.getElementById('progress-bar').style.width = progress + '%';
-                    document.getElementById('progress-text').innerText = progress.toFixed(2) + '%';
-                    document.getElementById('eta').innerText = 'ETA: ' + eta.toFixed(2) + ' seconds';
-
-                    if (progress < 100) {
-                        setTimeout(updateProgressBar, 500);  // Poll every 500ms
-                    }
-                }
-            };
-
-            progressXhr.send();
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #50bcbc;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
         }
 
-        updateProgressBar();
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+#file-format-text {
+    font-size: 16px;
+    font-weight: bold; /* Makes the text bold */
+    margin-right: 10px; /* Adds some space between the text and the button */
+    vertical-align: middle; /* Aligns the text with the middle of the button */
+}
+
+#file-name-text {
+    font-size: 16px;
+    margin-left: 10px; /* Adds space between the button and the file name */
+    vertical-align: middle; /* Aligns the file name with the middle of the button */
+    color: #333; /* Optional: sets the text color */
+}
+
+
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="logo">
+            <img src="{% static 'logo.png' %}" alt="Logo">
+        </div>
+    </div>
+
+    <div class="center-container">
+        <form method="post" enctype="multipart/form-data" target="display-frame">
+            {% csrf_token %}
+<div class="form-row">
+    <h3 id="file-format-text">Select XLSX or CSV format:</h3>
+    <label for="file-upload" class="custom-file-label">Choose File</label>
+    <input id="file-upload" type="file" name="csv_file" class="custom-file-input" />
+    <span id="file-name-text"></span> <!-- Span to display the selected file name -->
+</div>
+
+            <div class="form-row">
+                <h3>Save Output as</h3>
+                <label><input type="radio" name="format" value="xlsx" checked>XLSX</label>
+                <label><input type="radio" name="format" value="csv">CSV</label>
+            </div>
+
+            <div class="button-container">
+                <button class="button" type="submit" name="action" value="upload">Upload</button>
+                <button class="button" type="button" id="run-button">Run</button>
+            </div>
+        </form>
+
+        <div id="spinner" style="display: none;">
+            <div class="spinner"></div>
+<div style="text-align: center; margin-top: 20px;">
+    <h3>Your request is being processed, please wait...</h3>
+    <h3>Please don't close this window.</h3>
+</div>
+
+        </div>
+        <div id="eta"></div>
+        <div id="run-result"></div>
+
+        <a id="download-link" class="button" href="#" download>Download Processed File</a>
+        <br><br>
+
+        <button id="show-updated-table" class="button" style="display: none;">Show Updated Table</button>
+
+        <br><br>
+        <iframe id="display-frame" name="display-frame" style="width:100%; height:600px; box-shadow: none; border: none;" src=""></iframe>
+    </div>
+
+
+    <button class="help-button" onclick="alert('Help Functionality Placeholder!')">?</button>
+
+    <input type="checkbox" id="help-checkbox">
+    <label for="help-checkbox" class="help-button">?</label>
+
+    <div class="help-content" style="text-align: left;">
+        <strong>? Need Help</strong>
+        <p>Welcome to the file processing tool! Here are some simple steps to help you get started:</p>
+        <p><strong>1. Select a File:</strong> Click on the "Choose File" button to upload your CSV or XLSX file. Please ensure that your file is in the correct format and that your table is structured as planned for successful processing.</p>
+        <p><strong>2. Upload the File:</strong> Click the "Upload" button to upload your file to the server. This step is necessary before you can process the file.</p>
+        <p><strong>3. Save Output as:</strong> Choose the format in which you want to save the processed output. You can select either CSV or XLSX.</p>
+        <p><strong>4. Process the File:</strong> Once the file is uploaded and the output format is selected, click the "Run" button to start processing. The system will display an estimated time of arrival (ETA) and a progress bar indicating the status of the processing. A spinner will show that the process is in progress.</p>
+        <p><strong>5. Confetti Animation:</strong> Upon completion of the processing, a confetti animation will appear on the screen to celebrate the successful operation.</p>
+        <p><strong>6. Show Updated Table:</strong> After processing, you can view the updated table with new content. Click the "Show Updated Table" button to refresh the table preview and view the processed data.</p>
+        <p><strong>7. Download the Processed File:</strong> Once the updated table is displayed, the "Download" button will become available. Please note that the download link is available only once, so make sure to save the file carefully in your preferred format.</p>
+        <p><strong>Important Notice:</strong> After downloading the processed file, it will be deleted from the server. Ensure you download the file immediately, as this is a one-time action. After downloading, the "Show Updated Table" preview will no longer be available.</p>
+        <p>If you encounter any issues or have questions, feel free to reach out for support.</p>
+    </div>
+
+    <script>
+// Event listener for the custom file label click
+document.querySelector('.custom-file-label').addEventListener('click', function (e) {
+    e.preventDefault();  // Prevent the default label click behavior
+    document.getElementById('file-upload').click();
+});
+
+// Event listener for file selection
+document.getElementById('file-upload').addEventListener('change', function () {
+    const file = this.files[0];
+    if (file) {
+        const fileType = file.name.split('.').pop().toLowerCase();
+        if (fileType === 'xlsx' || fileType === 'csv') {
+            // Display the selected file name
+            document.getElementById('file-name-text').textContent = file.name;
+
+            // Trigger short confetti burst in golden colors
+            triggerConfetti();
+        } else {
+            // Display an error message for incorrect file format
+            showAlert('Invalid file format! Please select an XLSX or CSV file.');
+            this.value = '';  // Clear the file input to allow re-selection
+            document.getElementById('file-name-text').textContent = ''; // Clear any previously displayed file name
+        }
+    }
+});
+
+// Event listener for the run button click
+document.getElementById('run-button').onclick = function () {
+    // Display spinner and reset UI elements
+    document.getElementById('spinner').style.display = 'block';
+    document.getElementById('eta').innerText = '';
+    document.getElementById('download-link').style.display = 'none';
+    document.getElementById('show-updated-table').style.display = 'none';
+
+    // Prepare form data
+    var formData = new FormData(document.querySelector('form'));
+    var startTime = Date.now();
+    var rowTimes = [];
+    var totalRows = 0;
+
+    // AJAX request to run the data processing function
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '{% url "run_df" %}', true);
+
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            document.getElementById('run-result').innerHTML = response.result;
+            var filename = response.filename;
+
+            // Show "Show Updated Table" button and start confetti
+            document.getElementById('show-updated-table').style.display = 'block';
+            startConfetti();
+
+            // Event listener for the "Show Updated Table" button click
+            document.getElementById('show-updated-table').onclick = function () {
+                // Display the updated table
+                document.getElementById('display-frame').src = '{% url "display_csv_2" "filename_placeholder" %}'.replace('filename_placeholder', filename);
+
+                // Hide the "Show Updated Table" button and stop confetti
+                document.getElementById('show-updated-table').style.display = 'none';
+                stopConfetti();
+
+                // Show the download button with the correct URL
+                document.getElementById('download-link').href = response.download_url;
+                document.getElementById('download-link').style.display = 'block';
+            };
+        } else {
+            showAlert('Failed to run the function.');
+        }
+        document.getElementById('spinner').style.display = 'none';
+        document.getElementById('eta').innerText = '';
     };
-</script>
+
+    xhr.send(formData);
+
+    // Function to update ETA
+    function updateETA() {
+        var progressXhr = new XMLHttpRequest();
+        progressXhr.open('GET', '{% url "get_progress" %}', true);
+
+        progressXhr.onload = function () {
+            if (progressXhr.status === 200) {
+                var progressResponse = JSON.parse(progressXhr.responseText);
+                var currentRow = progressResponse.current_row;
+                totalRows = progressResponse.total_rows;
+
+                if (currentRow > 0) {
+                    var elapsedTime = (Date.now() - startTime) / 1000; // in seconds
+                    rowTimes.push(elapsedTime / currentRow);
+
+                    if (rowTimes.length > 5) rowTimes.shift(); // Keep only last 5 times
+
+                    var avgTimePerRow = rowTimes.reduce((a, b) => a + b, 0) / rowTimes.length;
+                    var remainingRows = totalRows - currentRow;
+                    var estimatedTimeRemaining = remainingRows * avgTimePerRow;
+
+                    document.getElementById('eta').innerText = 'ETA: ' + estimatedTimeRemaining.toFixed(2) + ' seconds';
+                }
+
+                if (currentRow < totalRows) {
+                    setTimeout(updateETA, 500);  // Poll every 500ms
+                }
+            }
+        };
+
+        progressXhr.send();
+    }
+
+    updateETA();
+};
+
+// Function to trigger a short confetti burst in golden colors (after file selection)
+function triggerConfetti() {
+    confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { x: 0.5, y: 0.5 },  // Middle of the screen
+        colors: ['#FFD700', '#FFAA00', '#FFCC00'],
+        ticks: 200,  // Short duration
+        gravity: 1.0
+    });
+}
+
+// Function to show an alert message
+function showAlert(message) {
+    alert(message); // Simple alert box
+}
+
+// Confetti functions for processing completion
+var confettiInstance;
+
+function startConfetti() {
+    confettiInstance = setInterval(function () {
+        // Confetti from the left side
+        confetti({
+            particleCount: 100, // Half the particles from the left
+            spread: 120, // Spread towards the center
+            origin: { x: 0.0, y: 0.5 }, // From the left side, center vertically
+            colors: ['#00BFFF', '#87CEFA', '#4682B4', '#5F9EA0', '#FFD700', '#FFA500', '#32CD32', '#FF69B4'], // Colors
+            shapes: ['circle', 'square'], // Mixed shapes
+            gravity: 0.5, // Moderate fall speed
+            scalar: 1.1, // Slightly larger particles
+            ticks: 500 // Longer lasting confetti
+        });
+
+        // Confetti from the right side
+        confetti({
+            particleCount: 100, // Half the particles from the right
+            spread: 120, // Spread towards the center
+            origin: { x: 1.0, y: 0.5 }, // From the right side, center vertically
+            colors: ['#00BFFF', '#87CEFA', '#4682B4', '#5F9EA0', '#FFD700', '#FFA500', '#32CD32', '#FF69B4'], // Colors
+            shapes: ['circle', 'square'], // Mixed shapes
+            gravity: 0.5, // Moderate fall speed
+            scalar: 1.1, // Slightly larger particles
+            ticks: 500 // Longer lasting confetti
+        });
+    }, 1500); // Launch confetti every 1500ms
+}
+
+function stopConfetti() {
+    clearInterval(confettiInstance);
+}
+
+    </script>
 
 </body>
+
 </html>

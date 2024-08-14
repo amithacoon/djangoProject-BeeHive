@@ -108,13 +108,15 @@ def save_dataframe(df, format, rtl=True):
         raise ValueError("Unsupported format. Please choose either 'csv' or 'xlsx'.")
 
 
+
 # Example usage
-df = load_excel_to_dataframe('Test - Copy.xlsx')
-new_df= asis_df(df, 0, "כותרת")
-new_df = process_dataframe(df, 6, 'תקציר על יזם', prompt1, new_df)
-new_df = process_dataframe(df, 16, 'תקציר על האתגר', prompt2, new_df)
+df = load_excel_to_dataframe('example bashlot.xlsx')
+print(df)
+# new_df= asis_df(df, 0, "כותרת")
+new_df = process_dataframe_summary(df, 6, 'תקציר פרויקט', prompt1)
+# new_df = process_dataframe(df, 16, 'תקציר על האתגר', prompt2, new_df)
 save_dataframe(new_df, 'xlsx')
-save_dataframe(new_df, 'csv')
+# save_dataframe(new_df, 'csv')
 
 # # Display the resulting DataFrame
 # print(new_df)
