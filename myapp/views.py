@@ -1,7 +1,9 @@
 import io
 import os
 import sys
-
+import logging
+import sys
+import io
 import pandas as pd
 import csv
 from django.shortcuts import render, HttpResponse
@@ -17,13 +19,93 @@ import shutil
 from django.shortcuts import render, HttpResponse
 from .forms import UploadCSVForm
 from google.api_core.exceptions import ResourceExhausted
+import logging
 
-prompt1 = "קח את הטקסט הבא בעברית וסכם את הרקע המקצועי והאישי של היזם/יזמים למשפט אחד."
-prompt2 = "קח את הטקסט הבא בעברית וסכם את האתגר המרכזי והספציפי שהמיזם מנסה לפתור בשני משפטים."
-prompt3 = "קח את הטקסט הבא בעברית ותאר כיצד המיזם נותן מענה טכנולוגי או אסטרטגי לאתגר הספציפי בשני משפטים."
-prompt4 = "קח את הסיכומים הבאים וכתוב סיכום חדש על המיזם באורך של עד 120 מילים. תן דגש לתכנית הפעולה או השלבים הבאים במיזם לקראת הסוף. אם שם המיזם לא מופיע בטקסט, קרא לו 'המיזם'."
-prompt5 = "קח את הטקסט הבא בעברית וסכם את ההישגים או השלבים המרכזיים שנעשו עד היום במיזם למשפט אחד של עד 30 מילים."
-prompt6 = "קח את הסיכומים הבאים וכתוב סיכום חדש ותמציתי על המיזם, כולל המטרה העיקרית והיתרון המרכזי, למשפט אחד בעברית."
+# Configure logging (if not already done)
+# Configure logging to both file and console
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('myapp.log', encoding='utf-8'),  # Log to a file with UTF-8 encoding
+        logging.StreamHandler()  # Log to the console (using the default encoding for the console)
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+# New view to serve log content
+import re
+
+def show_logs(request):
+    log_file_path = 'myapp.log'  # Path to the log file
+    http_request_logs = []
+
+    # Regular expression to match HTTP request logs
+    http_request_pattern = re.compile(r'\"(GET|POST|PUT|DELETE|PATCH) .+\" \d{3} \d+')
+
+    if os.path.exists(log_file_path):
+        with open(log_file_path, 'r') as log_file:
+            for line in log_file:
+                if http_request_pattern.search(line):
+                    http_request_logs.append(line)
+        log_content = ''.join(http_request_logs)
+        return HttpResponse(log_content, content_type='text/plain')
+    else:
+        return HttpResponse("Log file not found.", content_type='text/plain')
+
+
+
+
+
+
+
+
+
+prompt1 = (
+    "קח את הטקסט הבא בעברית וסכם את הרקע המקצועי והאישי של היזם או היזמים בצורה קצרה וממוקדת. "
+    "השתמש במשפט אחד ברור וממוקד שמכיל מידע מרכזי בלבד על הניסיון המקצועי וההכשרות האישיות הרלוונטיות שלהם. "
+    "אנא הימנע מפרטים שוליים והתרכז רק בנקודות המפתח שיכולות לתרום להבנת היכולות של היזם בתחום זה. "
+    "החזר את התשובה בעברית בלבד וללא סימנים מיוחדים כמו * או #."
+)
+
+prompt2 = (
+    "קח את הטקסט הבא בעברית וסכם את האתגר המרכזי והספציפי שהמיזם מנסה לפתור. "
+    "נסח שני משפטים קצרים וברורים שמתארים את הבעיה המרכזית שהמיזם מתמודד איתה. "
+    "על המשפטים להתרכז בהיבטים הקריטיים של האתגר, תוך הדגשה מדוע הוא חשוב לתחום בו פועל המיזם. "
+    "אין לכלול תיאורים כלליים, רק פרטים מדויקים ונקודתיים. "
+    "החזר את התשובה בעברית בלבד וללא סימנים מיוחדים כמו * או #."
+)
+
+prompt3 = (
+    "קח את הטקסט הבא בעברית ופרט כיצד המיזם מציע פתרון טכנולוגי או אסטרטגי לאתגר הספציפי. "
+    "כתוב שני משפטים שמדגישים את האסטרטגיה המרכזית או את הפתרון הטכנולוגי המרכזי שהמיזם מציע, "
+    "תוך התמקדות בחדשנות ובייחודיות של הגישה שנבחרה. על התיאור להיות ממוקד ומבוסס על יתרונות מעשיים של המיזם. "
+    "החזר את התשובה בעברית בלבד וללא סימנים מיוחדים כמו * או #."
+)
+
+prompt4 = (
+    "סכם את המידע המופיע בטקסטים הבאים וכתוב תיאור חדש וממוקד של המיזם באורך של לפחות 150 מילים. "
+    "על התיאור להדגיש את תכנית הפעולה או השלבים הבאים שהמיזם מתכנן ליישם, "
+    "תוך התמקדות בהתפתחויות העתידיות והאתגרים המרכזיים שעדיין נדרשים להתמודדות. "
+    "במידה ושם המיזם אינו מופיע בטקסט, השתמש במונח 'המיזם' במקום שם ספציפי. "
+    "החזר את התשובה בעברית בלבד וללא סימנים מיוחדים כמו * או #."
+)
+
+
+prompt5 = (
+    "קח את הטקסט הבא בעברית וסכם בצורה מדויקת את ההישגים המרכזיים או השלבים העיקריים שהושגו עד היום במיזם. "
+    "נסח משפט אחד, של לפחות 30 מילים, המתאר בקצרה ובאופן ממוקד את ההתקדמות וההישגים הבולטים ביותר של המיזם. "
+    "שים דגש על תוצאות ממשיות או צעדים חשובים שנעשו בדרך להגשמת מטרות המיזם. "
+    "החזר את התשובה בעברית בלבד וללא סימנים מיוחדים כמו * או #."
+)
+
+prompt6 = (
+    "קח את הסיכומים הבאים וכתוב סיכום חדש וממוקד על המיזם, המדגיש את המטרה העיקרית והיתרון המרכזי שלו. "
+    "נסח משפט אחד בעברית המשלב את שני האלמנטים הללו בצורה תמציתית וברורה. "
+    "המשפט צריך לשקף את הערך המוסף של המיזם ואת הייחודיות שלו בתחום בו הוא פועל. "
+    "החזר את התשובה בעברית בלבד וללא סימנים מיוחדים כמו * או #."
+)
 
 'gemini-1.5-flash'
 'gemini-1.0-pro'
@@ -400,13 +482,14 @@ def process_dataframe_summary(df, result_df=None):
     total_rows = len(df) - 1
 
     for i in range(len(df)):
+        name= str(df.iloc[i, 0])
         text = str(df.iloc[i, 10])
         answer1 = gemini(prompt2, text)
         text2 = str(df.iloc[i, 11])
         answer2 = gemini(prompt3, text2)
         text3 = str(df.iloc[i, 15])
         answer3 = gemini(prompt5, text3)
-        text4 = " הסיכומים הינם " + answer1 + answer2 + answer3
+        text4 =  "שם המיזם הינו - " + name +  " הסיכומים הינם " + answer1 + answer2 + answer3
         answer4 = gemini(prompt4, text4)
         results.append(answer4)
 
@@ -447,15 +530,36 @@ def process_dataframe_summary_one_line(df, result_df=None):
 
 def get_tags_activity(df, result_df=None):
     results = []
-    tag_list = ["תעסוקה", "מוביליות חברתית", "חינוך והשכלה", "בריאות נפשית", "בריאות", "אחר", "קהילה"]
+    # הגדרת מילות המפתח לכל תג
+    keywords = {
+        "תעסוקה": ["תעסוקה", "משק", "קריירה", "עבודה", "מובטלים", "אבטלה", "שכר", "הכשרה", "קישורים"],
+        "חוסן כלכלי": ["חובות", "כלכלי", "עוני", "פערים חברתיים", "סוציו-אקונומי"],
+        "חינוך והשכלה": ["אוריינות", "דיגיטלית", "Stem", "השכלה", "חינוך", "בית ספר", "אקדמיה"],
+        "בריאות נפשית": ["נפש", "רגש", "דיכאון", "חרדה", "פוסט-טראומה", "הפרעות אכילה", "אובדנות", "התחזקות נפשית", "Mental"],
+        "לכידות קהילתית": ["שכונה", "קהילה", "הון חברתי", "שייכות", "קבוצת שווים", "מועצות", "התנדבות", "ערבות הדדית"],
+        "אלימות ופשיעה": ["התחמקות", "סמים", "אלימות", "פגיעה מינית", "ביזול", "עבירות", "חם"],
+        "בריאות ושיקום פיזי": ["אורח חיים", "תזונה", "פגיעות גופניות", "חולי", "ספורט", "פיזיותרפיה"]
+    }
 
     for i in range(len(df)):
         try:
             text = str(df.iloc[i, 10])
-            prompt = f"Given the next Hebrew text: '{text}', which of these tags is the best match? {tag_list}. Return only the tag and nothing else, return one!."
-            answer = gemini(prompt, text)
-            results.append(answer)
-            logger.info(f"Tag for activity in row {i + 1}/{len(df)} has been completed.")
+            found_tag = None
+
+            # חיפוש המילים בטקסט והתאמת התג המתאים ממילות המפתח
+            for tag, words in keywords.items():
+                if any(word in text for word in words):
+                    found_tag = tag
+                    logger.info(f"Tag for activity in row {i + 1}/{len(df)} was found using keywords.")
+                    break
+
+            # אם לא נמצאה התאמה למילות המפתח, השתמש ב-GEMINI כדי להתאים תג
+            if found_tag is None:
+                prompt = f"Given the next Hebrew text: '{text}', which of these tags is the best match? {list(keywords.keys())}. Return only the tag and nothing else, return one!."
+                found_tag = gemini(prompt, text)
+                logger.info(f"Tag for activity in row {i + 1}/{len(df)} was found using GEMINI.")
+
+            results.append(found_tag)
         except Exception as e:
             logger.error(f"Error processing row {i + 1}: {e}")
             results.append(None)
@@ -469,42 +573,41 @@ def get_tags_activity(df, result_df=None):
     result_df = result_df.join(new_column_df)
     return result_df
 
-def get_tags_age(df, result_df=None):
-    results = []
-    tag_list = ["הגיל הרך", "ילדים ונוער", "צעירים", "הזדקנות מיטבית, אנשים מעל גיל 90", "אחר"]
-
-    for i in range(len(df)):
-        try:
-            text = str(df.iloc[i, 10])
-            prompt = f"Given the next Hebrew text: '{text}', which of these tags is the best match? {tag_list}. Return only the tag and nothing else, return one!."
-            answer = gemini(prompt, text)
-            results.append(answer)
-            logger.info(f"Tag for age group in row {i + 1}/{len(df)} has been completed.")
-        except Exception as e:
-            logger.error(f"Error processing row {i + 1}: {e}")
-            results.append(None)
-
-    newname = "תג - קבוצת גיל"
-    new_column_df = pd.DataFrame(results, columns=[newname])
-
-    if result_df is None:
-        result_df = pd.DataFrame(index=df.index)
-
-    result_df = result_df.join(new_column_df)
-    return result_df
 
 def get_tags_population(df, result_df=None):
     results = []
-    tag_list = ["החברה הערבית", "החברה החרדית", 'קהילת הלהט"ב', "קהילת יוצאי אתיופיה",
-                "אוכלוסיות בסיכון ומצבי קצה", "אנשים עם מוגבלות", "אחר"]
+    # הגדרת מילות המפתח לכל תג
+    keywords = {
+        "הגיל הרך": ["תינוקות", "פעוטות", "גני ילדים", "לידה"],
+        "ילדים ונוער": ["בני נוער", "ילדים", "הורים", "בית ספר"],
+        "צעירים": ["חיילים משוחררים", "צעירים", "ג'וניורים", "סטודנטים"],
+        "זקנים": ["הגיל השלישי", "זקנים", "תחולת חיים", "פנסיה", "קשישים"],
+        "החברה הערבית": ["בדואים", "ערבים", "דרוזים", "פזורה", "המשולש"],
+        "החברה החרדית": ["חרדים", "כולל", "לימודי ליבה"],
+        "אוכלוסיות מיעוטים נוספות": ["יוצאי אתיופיה", "עולים חדשים", "להט\"ב"],
+        "אוכלוסיות במצבי קצה": ["אסירים משוחררים", "דרי רחוב", "זנות"],
+        "אנשים עם מוגבלות": ["נכות", "מוגבלות", "חרשים", "עיוורים", "אוטיזם", "נפשי", "מוגבלים שכלית", "מוגבלות פיזית"]
+    }
 
     for i in range(len(df)):
         try:
             text = str(df.iloc[i, 16])
-            prompt = f"Given the next Hebrew text: '{text}', which of these tags is the best match? {tag_list}. Return only the tag and nothing else, return one!."
-            answer = gemini(prompt, text)
-            results.append(answer)
-            logger.info(f"Tag for population in row {i + 1}/{len(df)} has been completed.")
+            found_tag = None
+
+            # חיפוש המילים בטקסט והתאמת התג המתאים ממילות המפתח
+            for tag, words in keywords.items():
+                if any(word in text for word in words):
+                    found_tag = tag
+                    logger.info(f"Tag for population in row {i + 1}/{len(df)} was found using keywords.")
+                    break
+
+            # אם לא נמצאה התאמה למילות המפתח, השתמש ב-GEMINI כדי להתאים תג
+            if found_tag is None:
+                prompt = f"Given the next Hebrew text: '{text}', which of these tags is the best match? {list(keywords.keys())}. Return only the tag and nothing else, return one!."
+                found_tag = gemini(prompt, text)
+                logger.info(f"Tag for population in row {i + 1}/{len(df)} was found using GEMINI.")
+
+            results.append(found_tag)
         except Exception as e:
             logger.error(f"Error processing row {i + 1}: {e}")
             results.append(None)
@@ -549,22 +652,30 @@ def score_Hadash(df, result_df=None):
     result_df = result_df.join(new_column_df)
     return result_df
 
-
 def score_Hadash2(df, result_df=None):
     results = []
     total_rows = len(df) - 1
 
     prompt_start_date2 = """
-    קח את הטקסט הבא ופרט בצורה מקצועית את הסיבות לכך שהוא חדשני ביחס למיזמים דומים שאתה מכיר במקורות שלך, מבחינת הבעיה שהמיזם פותר. השתמש במידע מהאינטרנט ללא אזכור כתובות של אתרים, והחזר את התשובה בתגיות שמייצגות את הסיבות לחדשנות, עד 3 תגיות מופרדות בפסיקים, וכל סיבה בתגית יכולה לכלול עד 20 מילים. כל התוכן צריך להיות בטקסט, ללא כותרות.
+    קח את הטקסט הבא ופרט בצורה מקצועית את הסיבות לכך שהוא חדשני ביחס למיזמים דומים שאתה מכיר במקורות שלך, מבחינת הבעיה שהמיזם פותר. השתמש במידע מהאינטרנט ללא אזכור כתובות של אתרים. החזר את התשובה בפורמט הבא:
+    סיבה ראשונה: [סיבה ראשונה]
+    סיבה שניה:  [סיבה שנייה]
+וכדומה כמה שצריך. 
+    יש להחזיר את התשובה בטקסט פשוט, ללא כותרות או תווים מיוחדים כמו * או #, ועד 20 מילים לכל סיבה. כל סיבה צריכה להיות בפסקה נפרדת.
     """
 
     for i in range(len(df)):
         try:
             text1 = str(df.iloc[i, 16])
-            date = gemini(prompt_start_date2, text1)
+            response_text = gemini(prompt_start_date2, text1)
+
+            # הוספת '#' וירידת שורה אחרי כל סיבה
+            for reason_number in ["ראשונה", "שניה", "שלישית", "רביעית", "חמישית", "שישית"]:
+                response_text = response_text.replace(f"סיבה {reason_number}:", f"#סיבה {reason_number}:\n")
+
             logger.info(f"Processed row {i + 1}/{total_rows + 1}: Reasons for innovation")
 
-            results.append(date)
+            results.append(response_text)
         except Exception as e:
             logger.error(f"Error processing row {i + 1}: {e}")
             results.append(None)
@@ -589,10 +700,44 @@ from django.views.decorators.csrf import csrf_exempt
 from google.api_core.exceptions import ResourceExhausted
 
 
+# Import required modules for handling logs
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+import logging
+import time
+import os
 
+# Existing imports and setup...
+# [Your existing code here]
+
+# Configure logging (if not already done)
+logging.basicConfig(
+    filename='myapp.log',  # Log to a file called 'myapp.log'
+    level=logging.INFO,  # Log level
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Log format
+)
+logger = logging.getLogger(__name__)
+
+# New view to serve log content
+def show_logs(request):
+    log_file_path = 'myapp.log'  # Path to the log file
+
+    if os.path.exists(log_file_path):
+        with open(log_file_path, 'r') as log_file:
+            log_content = log_file.read()
+        return HttpResponse(log_content, content_type='text/plain')
+    else:
+        return HttpResponse("Log file not found.", content_type='text/plain')
+
+# [Rest of your existing views like `run_df`, etc.]
+
+# Example run_df with logger info
 @csrf_exempt
 def run_df(request):
     if request.method == 'POST':
+        # Clear the log file
+        open('myapp.log', 'w').close()  # This will empty the log file
+
         start_time = time.time()
 
         file = request.FILES.get('csv_file')
@@ -607,39 +752,39 @@ def run_df(request):
         if df is None:
             return JsonResponse({'error': 'Failed to load file into DataFrame'}, status=400)
 
-        # הרצת תהליך עיבוד הנתונים
-        # לאחר כל שלב בעיבוד ה-DataFrame נוסיף הודעה שמדפיסה למסוף
-
+        # DataFrame processing steps with logging
         df1 = process_dataframe_summary(df, df)
-        logger.info("Completed processing df1: process_dataframe_summary")
+        logger.info("Completed processing: summary in paragraph")
 
         df2 = process_dataframe_summary_one_line(df1, df1)
-        logger.info("Completed processing df2: process_dataframe_summary_one_line")
+        logger.info("Completed processing: summary in one line ")
 
         df3 = get_tags_activity(df2, df2)
-        logger.info("Completed processing df3: get_tags_activity")
+        logger.info("Completed processing: social activity tag ")
 
         df5 = get_tags_population(df3, df3)
-        logger.info("Completed processing df5: get_tags_population")
+        logger.info("Completed processing: population target tag")
 
         df6 = score_Bashlot(df5, df5)
-        logger.info("Completed processing df6: score_Bashlot")
+        logger.info("Completed processing: maturity score ")
 
         df7 = score_Hadash(df6, df6)
-        logger.info("Completed processing df7: score_Hadash")
+        logger.info("Completed processing: innovation score ")
 
         df8 = score_Hadash2(df7, df7)
-        logger.info("Completed processing df8: score_Hadash2")
+        logger.info("Completed processing: reasons for innovation")
 
-        # שמירת ה-DataFrame
+        # Save the DataFrame
         save_dataframe(df8, format=format)
 
         end_time = time.time()
         execution_time = end_time - start_time
-        logger.info(f"run_df execution time: {execution_time} seconds")
+        minutes, seconds = divmod(execution_time, 60)
+        logger.info(f"Program execution time: {int(minutes)} minutes and {seconds:.2f} seconds")
 
         filename = f'Updated_Table.{format}'
         download_url = f'/media/download/{filename}'
-        return JsonResponse({'result': '', 'download_url': download_url, 'execution_time': execution_time, 'filename': filename})
+        return JsonResponse(
+            {'result': '', 'download_url': download_url, 'execution_time': execution_time, 'filename': filename})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)

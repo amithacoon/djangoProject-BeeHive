@@ -225,6 +225,29 @@
     color: #333; /* Optional: sets the text color */
 }
 
+.log-output {
+    direction: ltr;   /* Force left-to-right direction */
+    text-align: left; /* Align text to the left */
+    padding: 10px;    /* Add some padding for better readability */
+    background-color: #f5f5f5; /* Light background color for contrast */
+    border: 1px solid #ccc;    /* Add a border */
+    max-height: 300px; /* Limit the height of the log display */
+    overflow-y: auto;  /* Add scroll for overflow */
+    width: 100%; /* Ensure it takes full width of its container */
+    margin-left: 0; /* Override any RTL margin */
+    margin-right: auto; /* Automatically align to the left */
+}
+#show-logs-button {
+    direction: ltr;   /* Force LTR direction to override RTL */
+    text-align: left; /* Align text inside the button to the left */
+    float: left;      /* Align the button itself to the left */
+    margin-left: 0;   /* Remove any default left margin */
+    margin-right: auto; /* Align the button to the left */
+    display: block;   /* Ensure it's treated as a block element */
+}
+
+
+
 
     </style>
 </head>
@@ -298,8 +321,16 @@
         <p><strong>Important Notice:</strong> After downloading the processed file, it will be deleted from the server. Ensure you download the file immediately, as this is a one-time action. After downloading, the "Show Updated Table" preview will no longer be available.</p>
         <p>If you encounter any issues or have questions, feel free to reach out for support.</p>
     </div>
+<div style="direction: rtl; text-align: right;">
+<div style="text-align: left;">
+    <button id="logs-button">Show Logs</button>
+</div>
+<pre id="log-output" style="display:none; overflow-y: scroll; height: 300px; border: 1px solid #ccc; text-align: left;"></pre>
 
-    <script>
+
+<script>
+// Existing script...
+
 // Event listener for the custom file label click
 document.querySelector('.custom-file-label').addEventListener('click', function (e) {
     e.preventDefault();  // Prevent the default label click behavior
@@ -327,7 +358,7 @@ document.getElementById('file-upload').addEventListener('change', function () {
 });
 
 // Event listener for the run button click
-document.getElementById('run-button').onclick = function () {
+document.getElementById('run-button').addEventListener('click', function () {
     // Display spinner and reset UI elements
     document.getElementById('spinner').style.display = 'block';
     document.getElementById('eta').innerText = '';
@@ -355,7 +386,7 @@ document.getElementById('run-button').onclick = function () {
             startConfetti();
 
             // Event listener for the "Show Updated Table" button click
-            document.getElementById('show-updated-table').onclick = function () {
+            document.getElementById('show-updated-table').addEventListener('click', function () {
                 // Display the updated table
                 document.getElementById('display-frame').src = '{% url "display_csv_2" "filename_placeholder" %}'.replace('filename_placeholder', filename);
 
@@ -366,7 +397,7 @@ document.getElementById('run-button').onclick = function () {
                 // Show the download button with the correct URL
                 document.getElementById('download-link').href = response.download_url;
                 document.getElementById('download-link').style.display = 'block';
-            };
+            });
         } else {
             showAlert('Failed to run the function.');
         }
@@ -410,7 +441,7 @@ document.getElementById('run-button').onclick = function () {
     }
 
     updateETA();
-};
+});
 
 // Function to trigger a short confetti burst in golden colors (after file selection)
 function triggerConfetti() {
@@ -463,8 +494,37 @@ function startConfetti() {
 function stopConfetti() {
     clearInterval(confettiInstance);
 }
+let logsInterval;
 
-    </script>
+document.getElementById("logs-button").addEventListener("click", function() {
+    const logOutput = document.getElementById("log-output");
+    const button = document.getElementById("logs-button");
+
+    if (logOutput.style.display === 'none') {
+        // Show the logs
+        logOutput.style.display = 'block';
+        button.textContent = "Close Logs";
+
+        // Start refreshing the logs every 5 seconds
+        logsInterval = setInterval(function() {
+            fetch('/show_logs/')
+                .then(response => response.text())
+                .then(data => {
+                    logOutput.textContent = data;
+                    logOutput.scrollTop = logOutput.scrollHeight;  // Auto-scroll to the bottom
+                });
+        }, 5000);
+    } else {
+        // Hide the logs
+        logOutput.style.display = 'none';
+        button.textContent = "Show Logs";
+
+        // Stop refreshing the logs
+        clearInterval(logsInterval);
+    }
+});
+</script>
+
 
 </body>
 
