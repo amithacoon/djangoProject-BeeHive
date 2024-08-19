@@ -157,6 +157,19 @@ def handle_uploaded_file(f):
         for chunk in f.chunks():
             destination.write(chunk)
 
+# def csv_upload_view(request):
+#     if request.method == 'POST':
+#         form = UploadCSVForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             clear_media_directory()  # Clear the media directory before uploading the new file
+#             file = request.FILES['csv_file']
+#             handle_uploaded_file(file)
+#             return display_csv(request, file)
+#     else:
+#         form = UploadCSVForm()
+#     return render(request, 'home.html', {'form': form})
+
+
 def csv_upload_view(request):
     if request.method == 'POST':
         form = UploadCSVForm(request.POST, request.FILES)
@@ -164,15 +177,39 @@ def csv_upload_view(request):
             clear_media_directory()  # Clear the media directory before uploading the new file
             file = request.FILES['csv_file']
             handle_uploaded_file(file)
+
+            # Pass the file to display_csv to calculate row count and display the file
             return display_csv(request, file)
     else:
         form = UploadCSVForm()
+
     return render(request, 'home.html', {'form': form})
+
 
 def handle_uploaded_file(f):
     with open(f'media/{f.name}', 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
+
+# def display_csv(request, f):
+#     file_path = f'media/{f.name}'
+#     extension = os.path.splitext(file_path)[1].lower()
+#
+#     if extension == '.csv':
+#         data = read_csv_file(file_path)
+#     elif extension in ['.xls', '.xlsx']:
+#         data = read_excel_file(file_path)
+#     else:
+#         return HttpResponse("Unsupported file type")
+#
+#     if not data:
+#         return HttpResponse("No data found in file")
+#
+#     headers = data[0]
+#     rows = data[1:]
+#
+#     return render(request, 'display.html', {'headers': headers, 'rows': rows})
+
 
 def display_csv(request, f):
     file_path = f'media/{f.name}'
@@ -191,7 +228,17 @@ def display_csv(request, f):
     headers = data[0]
     rows = data[1:]
 
-    return render(request, 'display.html', {'headers': headers, 'rows': rows})
+    # Calculate the number of rows
+    num_rows = len(rows)
+
+    # Render the display.html and pass the number of rows to it
+    response = render(request, 'display.html', {'headers': headers, 'rows': rows, 'num_rows': num_rows})
+
+    # Pass the num_rows to the home.html for ETA calculation
+    response['X-Num-Rows'] = num_rows
+
+    return response
+
 
 def display_csv_2(request, filename):
     file_path = os.path.join('media/download', filename)
@@ -428,7 +475,6 @@ def score_Bashlot(df, result_df):
             date = 2.5
             print("Date Score (from text1): 2.5 (Default due to ValueError)")
 
-        # time.sleep(13)
 
         text2 = str(df.iloc[i, 5])
         try:
@@ -437,7 +483,6 @@ def score_Bashlot(df, result_df):
             tried = 2.5
             print("People Experienced Score (from text2): 2.5 (Default due to ValueError)")
 
-        # time.sleep(13)
 
         text3 = str(df.iloc[i, 8])
         try:
@@ -446,7 +491,6 @@ def score_Bashlot(df, result_df):
             employ = 2.5
             print("Salaried Employees Score (from text3): 2.5 (Default due to ValueError)")
 
-        # time.sleep(13)
 
         text4 = str(df.iloc[i, 9])
         try:
@@ -455,7 +499,6 @@ def score_Bashlot(df, result_df):
             money = 2.5
             print("Funds Raised Score (from text4): 2.5 (Default due to ValueError)")
 
-        # time.sleep(13)
 
         text5 = str(df.iloc[i, 11] + df.iloc[i, 12] + df.iloc[i, 14] + df.iloc[i, 15] + df.iloc[i, 16])
         try:
@@ -463,11 +506,9 @@ def score_Bashlot(df, result_df):
         except ValueError:
             percentage = 2.5
 
-        # time.sleep(6)
 
         result = 0.1 * date + 0.3 * tried + 0.1 * employ + 0.15 * money + 0.25 * percentage
         formatted_result = f"{result:.2f}"
-        # time.sleep(20)
         results.append(formatted_result)
 
     new_column_df = pd.DataFrame(results, columns=["ציון בשלות"])

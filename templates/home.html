@@ -211,44 +211,41 @@
             }
         }
 
-#file-format-text {
-    font-size: 16px;
-    font-weight: bold; /* Makes the text bold */
-    margin-right: 10px; /* Adds some space between the text and the button */
-    vertical-align: middle; /* Aligns the text with the middle of the button */
-}
+        #file-format-text {
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
 
-#file-name-text {
-    font-size: 16px;
-    margin-left: 10px; /* Adds space between the button and the file name */
-    vertical-align: middle; /* Aligns the file name with the middle of the button */
-    color: #333; /* Optional: sets the text color */
-}
+        #file-name-text {
+            font-size: 16px;
+            margin-left: 10px;
+            vertical-align: middle;
+            color: #333;
+        }
 
-.log-output {
-    direction: ltr;   /* Force left-to-right direction */
-    text-align: left; /* Align text to the left */
-    padding: 10px;    /* Add some padding for better readability */
-    background-color: #f5f5f5; /* Light background color for contrast */
-    border: 1px solid #ccc;    /* Add a border */
-    max-height: 300px; /* Limit the height of the log display */
-    overflow-y: auto;  /* Add scroll for overflow */
-    width: 100%; /* Ensure it takes full width of its container */
-    margin-left: 0; /* Override any RTL margin */
-    margin-right: auto; /* Automatically align to the left */
-}
-#show-logs-button {
-    direction: ltr;   /* Force LTR direction to override RTL */
-    text-align: left; /* Align text inside the button to the left */
-    float: left;      /* Align the button itself to the left */
-    margin-left: 0;   /* Remove any default left margin */
-    margin-right: auto; /* Align the button to the left */
-    display: block;   /* Ensure it's treated as a block element */
-}
+        .log-output {
+            direction: ltr;
+            text-align: left;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            max-height: 300px;
+            overflow-y: auto;
+            width: 100%;
+            margin-left: 0;
+            margin-right: auto;
+        }
 
-
-
-
+        #show-logs-button {
+            direction: ltr;
+            text-align: left;
+            float: left;
+            margin-left: 0;
+            margin-right: auto;
+            display: block;
+        }
     </style>
 </head>
 
@@ -261,14 +258,14 @@
     </div>
 
     <div class="center-container">
-        <form method="post" enctype="multipart/form-data" target="display-frame">
+        <form method="post" enctype="multipart/form-data" action="{% url 'upload-csv' %}" target="display-frame">
             {% csrf_token %}
-<div class="form-row">
-    <h3 id="file-format-text">Select XLSX or CSV format:</h3>
-    <label for="file-upload" class="custom-file-label">Choose File</label>
-    <input id="file-upload" type="file" name="csv_file" class="custom-file-input" />
-    <span id="file-name-text"></span> <!-- Span to display the selected file name -->
-</div>
+            <div class="form-row">
+                <h3 id="file-format-text">Select XLSX or CSV format:</h3>
+                <label for="file-upload" class="custom-file-label">Choose File</label>
+                <input id="file-upload" type="file" name="csv_file" class="custom-file-input" />
+                <span id="file-name-text"></span> <!-- Span to display the selected file name -->
+            </div>
 
             <div class="form-row">
                 <h3>Save Output as</h3>
@@ -284,11 +281,10 @@
 
         <div id="spinner" style="display: none;">
             <div class="spinner"></div>
-<div style="text-align: center; margin-top: 20px;">
-    <h3>Your request is being processed, please wait...</h3>
-    <h3>Please don't close this window.</h3>
-</div>
-
+            <div style="text-align: center; margin-top: 20px;">
+                <h3>Your request is being processed, please wait...</h3>
+                <h3>Please don't close this window.</h3>
+            </div>
         </div>
         <div id="eta"></div>
         <div id="run-result"></div>
@@ -321,209 +317,222 @@
         <p><strong>Important Notice:</strong> After downloading the processed file, it will be deleted from the server. Ensure you download the file immediately, as this is a one-time action. After downloading, the "Show Updated Table" preview will no longer be available.</p>
         <p>If you encounter any issues or have questions, feel free to reach out for support.</p>
     </div>
-<div style="direction: rtl; text-align: right;">
-<div style="text-align: left;">
-    <button id="logs-button">Show Logs</button>
-</div>
-<pre id="log-output" style="display:none; overflow-y: scroll; height: 300px; border: 1px solid #ccc; text-align: left;"></pre>
-
+    <div style="direction: rtl; text-align: right;">
+        <div style="text-align: left;">
+            <button id="logs-button">Show Logs</button>
+        </div>
+        <pre id="log-output" style="display:none; overflow-y: scroll; height: 300px; border: 1px solid #ccc; text-align: left;"></pre>
+    </div>
 
 <script>
-// Existing script...
+    // Event listener for the custom file label click
+    document.querySelector('.custom-file-label').addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent the default label click behavior
+        document.getElementById('file-upload').click();
+    });
 
-// Event listener for the custom file label click
-document.querySelector('.custom-file-label').addEventListener('click', function (e) {
-    e.preventDefault();  // Prevent the default label click behavior
-    document.getElementById('file-upload').click();
-});
+    // Event listener for file selection
+    document.getElementById('file-upload').addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const fileType = file.name.split('.').pop().toLowerCase();
+            if (fileType === 'xlsx' || fileType === 'csv') {
+                // Display the selected file name
+                document.getElementById('file-name-text').textContent = file.name;
 
-// Event listener for file selection
-document.getElementById('file-upload').addEventListener('change', function () {
-    const file = this.files[0];
-    if (file) {
-        const fileType = file.name.split('.').pop().toLowerCase();
-        if (fileType === 'xlsx' || fileType === 'csv') {
-            // Display the selected file name
-            document.getElementById('file-name-text').textContent = file.name;
+                // Trigger short confetti burst in golden colors
+                triggerConfetti();
 
-            // Trigger short confetti burst in golden colors
-            triggerConfetti();
-        } else {
-            // Display an error message for incorrect file format
-            showAlert('Invalid file format! Please select an XLSX or CSV file.');
-            this.value = '';  // Clear the file input to allow re-selection
-            document.getElementById('file-name-text').textContent = ''; // Clear any previously displayed file name
-        }
-    }
-});
-
-// Event listener for the run button click
-document.getElementById('run-button').addEventListener('click', function () {
-    // Display spinner and reset UI elements
-    document.getElementById('spinner').style.display = 'block';
-    document.getElementById('eta').innerText = '';
-    document.getElementById('download-link').style.display = 'none';
-    document.getElementById('show-updated-table').style.display = 'none';
-
-    // Prepare form data
-    var formData = new FormData(document.querySelector('form'));
-    var startTime = Date.now();
-    var rowTimes = [];
-    var totalRows = 0;
-
-    // AJAX request to run the data processing function
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '{% url "run_df" %}', true);
-
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            document.getElementById('run-result').innerHTML = response.result;
-            var filename = response.filename;
-
-            // Show "Show Updated Table" button and start confetti
-            document.getElementById('show-updated-table').style.display = 'block';
-            startConfetti();
-
-            // Event listener for the "Show Updated Table" button click
-            document.getElementById('show-updated-table').addEventListener('click', function () {
-                // Display the updated table
-                document.getElementById('display-frame').src = '{% url "display_csv_2" "filename_placeholder" %}'.replace('filename_placeholder', filename);
-
-                // Hide the "Show Updated Table" button and stop confetti
-                document.getElementById('show-updated-table').style.display = 'none';
-                stopConfetti();
-
-                // Show the download button with the correct URL
-                document.getElementById('download-link').href = response.download_url;
-                document.getElementById('download-link').style.display = 'block';
-            });
-        } else {
-            showAlert('Failed to run the function.');
-        }
-        document.getElementById('spinner').style.display = 'none';
-        document.getElementById('eta').innerText = '';
-    };
-
-    xhr.send(formData);
-
-    // Function to update ETA
-    function updateETA() {
-        var progressXhr = new XMLHttpRequest();
-        progressXhr.open('GET', '{% url "get_progress" %}', true);
-
-        progressXhr.onload = function () {
-            if (progressXhr.status === 200) {
-                var progressResponse = JSON.parse(progressXhr.responseText);
-                var currentRow = progressResponse.current_row;
-                totalRows = progressResponse.total_rows;
-
-                if (currentRow > 0) {
-                    var elapsedTime = (Date.now() - startTime) / 1000; // in seconds
-                    rowTimes.push(elapsedTime / currentRow);
-
-                    if (rowTimes.length > 5) rowTimes.shift(); // Keep only last 5 times
-
-                    var avgTimePerRow = rowTimes.reduce((a, b) => a + b, 0) / rowTimes.length;
-                    var remainingRows = totalRows - currentRow;
-                    var estimatedTimeRemaining = remainingRows * avgTimePerRow;
-
-                    document.getElementById('eta').innerText = 'ETA: ' + estimatedTimeRemaining.toFixed(2) + ' seconds';
-                }
-
-                if (currentRow < totalRows) {
-                    setTimeout(updateETA, 500);  // Poll every 500ms
-                }
+            } else {
+                // Display an error message for incorrect file format
+                showAlert('Invalid file format! Please select an XLSX or CSV file.');
+                this.value = ''; // Clear the file input to allow re-selection
+                document.getElementById('file-name-text').textContent = ''; // Clear any previously displayed file name
             }
+        }
+    });
+
+    // Capture the number of rows from display.html inside the iframe and calculate ETA
+    document.getElementById('display-frame').addEventListener('load', function() {
+        let numRows = document.getElementById('display-frame').contentWindow.document.getElementById('numRows').value;
+        let estimatedTime = numRows * 24;
+
+        // If the ETA is more than 60 seconds, convert to minutes and seconds
+        if (estimatedTime > 60) {
+            let minutes = Math.floor(estimatedTime / 60);
+            let seconds = estimatedTime % 60;
+            document.getElementById('eta').innerText = 'Estimated time: ' + minutes + ' minutes and ' + seconds + ' seconds';
+        } else {
+            document.getElementById('eta').innerText = 'Estimated time: ' + estimatedTime + ' seconds';
+        }
+
+        // Set the data-eta attribute to the calculated ETA
+        document.getElementById('eta').setAttribute('data-eta', estimatedTime);
+    });
+
+    // Event listener for the run button click
+    document.getElementById('run-button').addEventListener('click', function() {
+        // Display spinner and reset UI elements
+        document.getElementById('spinner').style.display = 'block';
+        document.getElementById('download-link').style.display = 'none';
+        document.getElementById('show-updated-table').style.display = 'none';
+
+        // Prepare form data
+        var formData = new FormData(document.querySelector('form'));
+        var totalETA = parseInt(document.getElementById('eta').getAttribute('data-eta'));
+
+        // AJAX request to run the data processing function
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '{% url "run_df" %}', true);
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                document.getElementById('run-result').innerHTML = response.result;
+                var filename = response.filename;
+
+                // Show "Show Updated Table" button and start confetti
+                document.getElementById('show-updated-table').style.display = 'block';
+                startConfetti();
+
+                // Event listener for the "Show Updated Table" button click
+              document.getElementById('show-updated-table').addEventListener('click', function() {
+    // Display the updated table
+    document.getElementById('display-frame').src = '{% url "display_csv_2" "filename_placeholder" %}'.replace('filename_placeholder', filename);
+
+    // Hide the "Show Updated Table" button and stop confetti
+    document.getElementById('show-updated-table').style.display = 'none';
+    stopConfetti();
+
+    // Clear the ETA display to avoid showing it again
+    document.getElementById('eta').innerText = '';
+
+    // Show the download button with the correct URL
+    document.getElementById('download-link').href = response.download_url;
+    document.getElementById('download-link').style.display = 'block';
+});
+
+            } else {
+                showAlert('Failed to run the function.');
+            }
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('eta').innerText = '';
         };
 
-        progressXhr.send();
-    }
+        xhr.send(formData);
 
-    updateETA();
-});
-
-// Function to trigger a short confetti burst in golden colors (after file selection)
-function triggerConfetti() {
-    confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { x: 0.5, y: 0.5 },  // Middle of the screen
-        colors: ['#FFD700', '#FFAA00', '#FFCC00'],
-        ticks: 200,  // Short duration
-        gravity: 1.0
-    });
-}
-
-// Function to show an alert message
-function showAlert(message) {
-    alert(message); // Simple alert box
-}
-
-// Confetti functions for processing completion
-var confettiInstance;
-
-function startConfetti() {
-    confettiInstance = setInterval(function () {
-        // Confetti from the left side
-        confetti({
-            particleCount: 100, // Half the particles from the left
-            spread: 120, // Spread towards the center
-            origin: { x: 0.0, y: 0.5 }, // From the left side, center vertically
-            colors: ['#00BFFF', '#87CEFA', '#4682B4', '#5F9EA0', '#FFD700', '#FFA500', '#32CD32', '#FF69B4'], // Colors
-            shapes: ['circle', 'square'], // Mixed shapes
-            gravity: 0.5, // Moderate fall speed
-            scalar: 1.1, // Slightly larger particles
-            ticks: 500 // Longer lasting confetti
-        });
-
-        // Confetti from the right side
-        confetti({
-            particleCount: 100, // Half the particles from the right
-            spread: 120, // Spread towards the center
-            origin: { x: 1.0, y: 0.5 }, // From the right side, center vertically
-            colors: ['#00BFFF', '#87CEFA', '#4682B4', '#5F9EA0', '#FFD700', '#FFA500', '#32CD32', '#FF69B4'], // Colors
-            shapes: ['circle', 'square'], // Mixed shapes
-            gravity: 0.5, // Moderate fall speed
-            scalar: 1.1, // Slightly larger particles
-            ticks: 500 // Longer lasting confetti
-        });
-    }, 1500); // Launch confetti every 1500ms
-}
-
-function stopConfetti() {
-    clearInterval(confettiInstance);
-}
-let logsInterval;
-
-document.getElementById("logs-button").addEventListener("click", function() {
-    const logOutput = document.getElementById("log-output");
-    const button = document.getElementById("logs-button");
-
-    if (logOutput.style.display === 'none') {
-        // Show the logs
-        logOutput.style.display = 'block';
-        button.textContent = "Close Logs";
-
-        // Start refreshing the logs every 5 seconds
-        logsInterval = setInterval(function() {
-            fetch('/show_logs/')
-                .then(response => response.text())
-                .then(data => {
-                    logOutput.textContent = data;
-                    logOutput.scrollTop = logOutput.scrollHeight;  // Auto-scroll to the bottom
-                });
-        }, 5000);
+        // Function to update ETA countdown
+// Function to update ETA countdown
+var countdownInterval = setInterval(function() {
+    if (totalETA > 0) {
+        let minutes = Math.floor(totalETA / 60);
+        let seconds = totalETA % 60;
+        if (minutes > 0) {
+            document.getElementById('eta').innerText = `Estimated time remaining: ${minutes} min ${seconds} sec`;
+        } else {
+            document.getElementById('eta').innerText = `Estimated time remaining: ${seconds} sec`;
+        }
+        totalETA--;
     } else {
-        // Hide the logs
-        logOutput.style.display = 'none';
-        button.textContent = "Show Logs";
-
-        // Stop refreshing the logs
-        clearInterval(logsInterval);
+        clearInterval(countdownInterval);
+        document.getElementById('eta').style.display = 'none';  // Hide the ETA after countdown
     }
-});
+}, 1000);
+
+    });
+
+    // Function to trigger a short confetti burst in golden colors (after file selection)
+    function triggerConfetti() {
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: {
+                x: 0.5,
+                y: 0.5
+            }, // Middle of the screen
+            colors: ['#FFD700', '#FFAA00', '#FFCC00'],
+            ticks: 200, // Short duration
+            gravity: 1.0
+        });
+    }
+
+    // Function to show an alert message
+    function showAlert(message) {
+        alert(message); // Simple alert box
+    }
+
+    // Confetti functions for processing completion
+    var confettiInstance;
+
+    function startConfetti() {
+        confettiInstance = setInterval(function() {
+            // Confetti from the left side
+            confetti({
+                particleCount: 100, // Half the particles from the left
+                spread: 120, // Spread towards the center
+                origin: {
+                    x: 0.0,
+                    y: 0.5
+                }, // From the left side, center vertically
+                colors: ['#00BFFF', '#87CEFA', '#4682B4', '#5F9EA0', '#FFD700', '#FFA500', '#32CD32', '#FF69B4'], // Colors
+                shapes: ['circle', 'square'], // Mixed shapes
+                gravity: 0.5, // Moderate fall speed
+                scalar: 1.1, // Slightly larger particles
+                ticks: 500 // Longer lasting confetti
+            });
+
+            // Confetti from the right side
+            confetti({
+                particleCount: 100, // Half the particles from the right
+                spread: 120, // Spread towards the center
+                origin: {
+                    x: 1.0,
+                    y: 0.5
+                }, // From the right side, center vertically
+                colors: ['#00BFFF', '#87CEFA', '#4682B4', '#5F9EA0', '#FFD700', '#FFA500', '#32CD32', '#FF69B4'], // Colors
+                shapes: ['circle', 'square'], // Mixed shapes
+                gravity: 0.5, // Moderate fall speed
+                scalar: 1.1, // Slightly larger particles
+                ticks: 500 // Longer lasting confetti
+            });
+        }, 1500); // Launch confetti every 1500ms
+    }
+
+    function stopConfetti() {
+        clearInterval(confettiInstance);
+    }
+
+    let logsInterval;
+
+    document.getElementById("logs-button").addEventListener("click", function() {
+        const logOutput = document.getElementById("log-output");
+        const button = document.getElementById("logs-button");
+
+        if (logOutput.style.display === 'none') {
+            // Show the logs
+            logOutput.style.display = 'block';
+            button.textContent = "Close Logs";
+
+            // Start refreshing the logs every 5 seconds
+            logsInterval = setInterval(function() {
+                fetch('/show_logs/')
+                    .then(response => response.text())
+                    .then(data => {
+                        logOutput.textContent = data;
+                        logOutput.scrollTop = logOutput.scrollHeight; // Auto-scroll to the bottom
+                    });
+            }, 5000);
+        } else {
+            // Hide the logs
+            logOutput.style.display = 'none';
+            button.textContent = "Show Logs";
+
+            // Stop refreshing the logs
+            clearInterval(logsInterval);
+        }
+    });
 </script>
+
 
 
 </body>
