@@ -122,7 +122,7 @@ logger = logging.getLogger(__name__)
 def gemini(prompt, text):
     model_name = 'gemini-1.5-flash'
     model = genai.GenerativeModel(model_name)
-    genai.configure(api_key='AIzaSyB4uUsH3kMKA2cIpe8z4z221Ow4XRz0rWI')
+    genai.configure(api_key='api_key')
     combined = prompt + text
 
     while True:
